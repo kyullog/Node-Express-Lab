@@ -6,6 +6,8 @@ const router = express.Router();
 
 router.post("/", (req, res) => {
   const post = req.body;
+
+  //checks to see if the post has the required fields
   if (!post.title || !post.contents) {
     res
       .status(400)
@@ -13,6 +15,7 @@ router.post("/", (req, res) => {
   } else {
     db.insert(post)
       .then(response => {
+        //returns the note created by the post request
         db.findById(response.id)
           .then(response => {
             res.status(201).json(response);
@@ -23,6 +26,8 @@ router.post("/", (req, res) => {
             })
           );
       })
+
+      //returns error if request went bad
       .catch(err => {
         res.status(500).json({
           error: "There was an error while saving the post to the database"
@@ -31,6 +36,7 @@ router.post("/", (req, res) => {
   }
 });
 
+//get all the notes
 router.get("/", (req, res) => {
   db.find()
     .then(notes => {
@@ -45,6 +51,7 @@ router.get("/", (req, res) => {
     });
 });
 
+//get a single note by it's ID
 router.get("/:id", (req, res) => {
   const noteID = req.params.id;
   db.findById(noteID)
