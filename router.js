@@ -40,7 +40,6 @@ router.post("/", (req, res) => {
 router.get("/", (req, res) => {
   db.find()
     .then(notes => {
-      console.log(notes);
       res.status(200).json(notes);
     })
     .catch(err => {
@@ -83,6 +82,42 @@ router.delete("/:id", async (req, res) => {
     }
   } catch {
     res.status(500).json({ error: "The post could not be removed" });
+  }
+});
+
+//edit an existing post using its ID number
+router.put("/:id", async (req, res) => {
+  try {
+    const editID = req.params.id;
+    const editPost = req.body;
+
+    if (!editPost.title || !editPost.contents) {
+      res.status(400).json({
+        errorMessage: "Please provide the title and contents for the post."
+      });
+    } else {
+      try {
+        const success = await db.update(editID, editPost);
+        if (success) {
+          const editedNote = await db.findById(editID);
+          res.status(200).json(editedNote);
+        } else {
+          res
+            .status(404)
+            .json({
+              message: "The post with the specified id does not exist."
+            });
+        }
+      } catch {
+        res
+          .status(500)
+          .json({ error: "There was an issue retrieving your modified note" });
+      }
+    }
+  } catch {
+    res
+      .status(500)
+      .json({ error: "The post information could not be modified" });
   }
 });
 
